@@ -83,8 +83,18 @@ void Army::move( Map & map)
 		if (input == 0)
 		{
 			moved.erase(moved.begin(), moved.end());
-			break;
+			return;
 		}
+		bool moved_input = false;
+		for (int i = 0; i < moved.size(); i++)
+		{
+			if (input - 1 == moved[i])
+			{
+				cout << "Unit " << input << " was already moved this turn!" << endl;
+				moved_input = true;
+			}
+		}
+		if (moved_input) continue;
 		cout << "Where do you want to move unit " << input << "?" << endl;
 		cout << units[input-1] << endl;
 		int newPosition[2];
@@ -94,12 +104,15 @@ void Army::move( Map & map)
 		}
 		if (units[input-1].move(newPosition,map,armyId))
 		{
-			cout << "Unit" << input << "moves to square (" << newPosition[0] << "," << newPosition[1] << ")" <<endl;
+			cout << "Unit " << input << " moves to square (" << newPosition[0] << "," << newPosition[1] << ")" <<endl;
 			moved.push_back(input -1);
 		}
 		else
-			cout << "Unit" << input << "can't move to square (" << newPosition[0] << "," << newPosition[1] << ")" << endl;
+			cout << "Unit " << input << " can't move to square (" << newPosition[0] << "," << newPosition[1] << ")" << endl;
 	}
+	moved.erase(moved.begin(), moved.end());
+	cout << "You moved all your units, thus your turn has ended" << endl;
+
 }
 void Army::fortify()
 {
@@ -113,7 +126,7 @@ Unit & Army::operator[](int i)
 {
 	return units[i];
 }
-void Army::update(Unit & uni)
+void Army::update(const Unit & uni)
 {
 	for (int i = 0; i < noOfUnits();i++)
 	{
@@ -133,10 +146,10 @@ Unit  Army::operator[](int i) const
 	return units[i];
 }
 
-void battleResult(int height, int width, int strength, int result, string att)
+void battleResult(int height, int width, double strength, double result, string att)
 {
 	if (result > 0) cout << att << " has won a battle of the tile (" << height << ',' << width << ") with result : " << result << endl;
-	if (result > 0) cout << att << " has list a battle of the tile (" << height << ',' << width << ") with result : " << abs(result) << endl;
+	if (result <= 0) cout << att << " has lost a battle of the tile (" << height << ',' << width << ") with result : " << abs(result) << endl;
 
 }
 
@@ -154,6 +167,7 @@ void battle(Army & att, Army & def, Map & map)
 				map.applyBattleResult(i, j, att, def, result);
 				map.retreatLosers(i, j, att, def, result);
 				battleResult(i , j ,strength, result, att.name);
+				map.updateClash();
 			}
 		}
 	}

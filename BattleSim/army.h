@@ -26,7 +26,7 @@ public:
 	Unit & operator[](int); 
 	friend ostream& operator<<(ostream& out, const Army & arm);
 	friend void battle(Army &, Army &, Map &);
-	void update(Unit &);
+	void update(const Unit &);
 	int id() const;
 	string armyName() const;
 private:

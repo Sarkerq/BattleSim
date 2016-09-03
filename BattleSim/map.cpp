@@ -31,7 +31,7 @@ double sumDefend(int height, int width, vector<Unit> defenders, const Map & map)
 		power *= (1 + 0.01 * it->morale);
 		power *= (1 + 0.1 * it->exp);
 		power *= (0.01 * it->hit_points);
-		power *= (0.1 * it->fortification);
+		power *= (1 + 0.1 * it->fortification);
 		//tile modifiers
 		power *= (1 + 0.01 * map.modifier[height][width]);
 
@@ -278,23 +278,26 @@ void Map::retreatLosers(int height, int width, Army & att, Army & def, double re
 {
 	if (result > 0) cout << "Commander of army " << def.armyName() << ", where do you want to retreat your units?" << endl;
 	else cout << "Commander of army " << att.armyName() << ", where do you want to retreat your units?" << endl;
+	vector<pair<Unit,int>> retreaters;
 	for (vector<pair<Unit, int>>::iterator it = units[height][width].begin(); it != units[height][width].end(); ++it)
 	{
-
 		if ((it->second == att.id() && result <= 0) || (it->second == def.id() && result > 0))
 		{
-			cout << it->first << endl;
-			int position[2];
-			for (int i = 0; i < NUM_OF_DIMENSIONS; i++)
-			{
-				cin >> position[i];
-			}
-			it->first.move(position, *this, it->second);
-			if (it->second == att.id()) att.update(it->first);
-			else def.update(it->first);
+			retreaters.push_back(*it);
 		}
 	}
-
+	for (vector<pair<Unit,int>>::iterator it = retreaters.begin(); it != retreaters.end(); ++it)
+	{
+		cout << it->first << endl;
+		int position[2];
+		for (int i = 0; i < NUM_OF_DIMENSIONS; i++)
+		{
+			cin >> position[i];
+		}
+		it->first.move(position, *this, it->second);
+		if (it->second == att.id()) att.update(it->first);
+		else def.update(it->first);
+	}
 }
 void Map::updateClash()
 {
